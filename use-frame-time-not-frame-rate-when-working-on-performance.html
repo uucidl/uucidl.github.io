@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- 2016-05-19 Thu 17:02 -->
+<!-- 2016-06-18 Sat 17:00 -->
 <meta  charset="utf-8">
 <meta  name="viewport" content="width=device-width, initial-scale=1">
 <title>Use Frame Time not Frame Rate When Working On Performance</title>
@@ -94,6 +94,8 @@
 <body>
 <div id="content">
 <h1 class="title">use frame time not frame rate when working on performance</h1>
+<span class="post-meta">2016-06-18 17:00 CET</span>
+<span class="post-meta">nicolas@uucidl.com</span>
 <p>
 Hi, I've heard you were working on an interactive graphical
 application, and that you're doing your best to give it a smooth frame
@@ -101,14 +103,15 @@ rate.
 </p>
 
 <p>
-Try to ignore changes in frame rate when measuring or improving the
-performance of a component within the complete system. Remember
-instead your <b>frame time budget</b> (e.g. 16ms for a 60hz target) and
-track the time your component takes within that budget.
+Here is a piece of advice about measurements. Try to ignore changes in
+frame rate when measuring and tracking the performance of a component
+within the complete system. Remember instead your <b>frame time budget</b>
+(e.g. 16ms for a 60hz target) and track the time your component takes
+within that budget.
 </p>
 
 <p>
-To understand why, look at the relationship between your efforts and the
+You should see why when looking at the relationship between your efforts and the
 measurements.
 </p>
 
@@ -117,12 +120,6 @@ Since frame rates are inversely proportional to frame times, for the
 same optimization (a delta in time: &Delta;<sub>t</sub>), you will observe different
 frame rate deltas when you start from different frame times. (e.g. in
 different testing conditions or if the system changes)
-</p>
-
-<p>
-This relationship is <b>not linear</b>, with rate<sub>hz</sub> = 1/time<sub>s</sub> and thus
-rate<sub>hz</sub> = 1/(time<sub>s</sub> + &Delta;<sub>t</sub>), which makes it difficult to reason with frame
-rates.
 </p>
 
 <canvas id="fig1" width="600" height="240" style="width: 600px; height: 240px"></canvas>
@@ -315,9 +312,16 @@ d3.select("#max_ms_slider").on("input", function () {
 </script>
 
 <p>
-In order to deliver a smooth experience, what matters is whether your
-complete system meets your per-frame budget, such as 16ms for a 60hz
-target.
+This comes directly from the definition: rate<sub>hz</sub> = 1/time<sub>s</sub>. Since 
+it is non-linear, rates in hz for various subcomponents cannot be added to one another.
+Frame times however can be added and be used to predict the performance of the resulting
+system.
+</p>
+
+<p>
+To deliver a smooth experience, what matters is whether your
+complete system will consistently meet its per-frame budget,
+such as 16ms for a 60hz target.
 </p>
 
 <p>
@@ -396,6 +400,11 @@ body {
     width: 720px;
     font-size: 20px;
     line-height: 1.25;
+}
+.post-meta {
+    display: block;
+    text-align: right;
+    font-size: 12px;
 }
 #content {
     margin-left: 24px;
