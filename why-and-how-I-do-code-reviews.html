@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- 2016-06-18 Sat 17:00 -->
+<meta  charset="utf-8">
+<meta  name="viewport" content="width=device-width, initial-scale=1">
+<title>why-and-how-I-do-code-reviews</title>
+<meta  name="generator" content="Org-mode">
+<meta  name="author" content="Nicolas Léveillé &lt;nicolas@uucidl.com&gt;">
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Why And How I Do Code Reviews</h1>
+<span class="post-meta">2017-02</span>
+<span class="post-meta">nicolas@uucidl.com</span>
+
+<p>
+Software is developped by teams. <sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> Teams
+add to and change their systems over time. In this context, teams
+ensure that each system, or some of its parts, can be changed with
+reasonable effort, while maintaining valuable properties.
+</p>
+
+<p>
+Teams form bodies of practices around the systems they develop. By now
+many software development teams have adopted code reviews
+practices<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>.
+</p>
+
+<p>
+There are broad and well known reasons for reviews such as catching
+unwanted errors or enforcing homogeneity through the removal of a
+creator's bias about their own work. In other domains and for similar
+reason writers have editors and airplanes are flown with a
+co-pilot. <sup><a id="fnr.3" name="fnr.3" class="footref" href="#fn.3">3</a></sup>
+</p>
+
+<p>
+Regardless of the overt stated goals<sup><a id="fnr.4" name="fnr.4" class="footref" href="#fn.4">4</a></sup> motivating
+us to adopt a practice, becoming aware of what a practice concretely
+does can help us maximize its effectiveness, and magnify its most
+unique effects.
+</p>
+
+<p>
+When seen as a communication exchange, a mutual review of code can
+help form<sup><a id="fnr.5" name="fnr.5" class="footref" href="#fn.5">5</a></sup> and share knowledge and concepts of a
+system.
+</p>
+
+<p>
+I adopted my goals and method for performing code reviews by looking
+at some of their most unique aspects. A mutual review of code is
+unique in that it can simulate the situation of one maintainer
+interacting with a part of a software system previously unknown to
+them.
+</p>
+
+<p>
+Beyond communication and double-checking, I want code-reviews to help
+ensure that in the long run parts of a software can be understood and
+changed. (To preserve this, I prefer reviews starting with little
+pre-exposure to the material, so they can be as unbiased as possible)
+</p>
+
+<p>
+My goals are to check that:
+</p>
+<ul class="org-ul">
+<li>concepts are used correctly,
+</li>
+<li>new concepts are sensible and shared,
+</li>
+<li>code is understood today, and will be tomorrow
+</li>
+<li>code is likely to be and to stay correct
+</li>
+<li>system and context specific long-term properties are preserved <sup><a id="fnr.6" name="fnr.6" class="footref" href="#fn.6">6</a></sup>
+</li>
+</ul>
+
+<p>
+I also focus first on long term properties of the system rather than
+short-term ephemereal properties of the presented
+implementation. Implementations can improve, while long-term
+properties degrade easily.
+</p>
+
+<p>
+When a change is made to a software system, it must be understandable
+in terms of the pre-existing concepts of that system, or it must
+introduce the new concepts that have been formed with its
+documentation.
+</p>
+
+<p>
+Code that can be understood has a manifest purpose. It communicates
+what it does, throughout its existence, without unnecessarily hiding
+its purpose and function. When it is made of multiple parts, these
+parts have stable themes and goals, with visible interfaces
+in-between.
+</p>
+
+<p>
+Code is likely correct when tests exist that control what it does
+today and tomorrow, with a manifest specification.
+</p>
+
+<p>
+My strategy is to meet these goals as a sequence of reviews of
+different focus. During each of these reviews, I write down my
+questions and doubts without sharing them immediately with the author
+of the change. These will be resolved along the way and raised to the
+author according to their severity.
+</p>
+
+<p>
+First a cursory review, which starts with the plain language
+description of the changes, and a quick scan of the difference between
+the old and the new version of the code. We ignore detailed commit
+history at this point.
+</p>
+
+<p>
+The goal of this cursory review is to gain insight as to what the
+change is about, estimate the size of the review, and detect any high-
+level oddity that clashes with our superficial understanding and
+intuition.
+</p>
+
+<p>
+It gives us a sense for the size of the change. The focus required for
+a review can be intense. Rather than rushing we need to give ourselves
+enough time and peace to do a good job with it.
+</p>
+
+<p>
+This cursory review also simulates the situation of a maintainer
+navigating the code in search for some of its features. Code that
+cannot be understood superficially will be hard to navigate. So any
+doubt flagged during this pass probably has to be raised in the end.
+</p>
+
+<p>
+The second pass is a static detailed review of the total change. It
+mimicks the situation of a team member trying to understand a piece of
+code in order to later change it. Write down any question or
+doubt. Collect notes about relationships between parts and resolve
+questions that have been raised so far. If needed, open the files in
+your actual development environment.
+</p>
+
+<p>
+The third review goes through each commit in detail. This mimicks a
+maintainer having to go through commits while bisecting or analyzing a
+defect in detail.
+</p>
+
+<p>
+Reviewing commits one after another should resolve and clarify most
+questions that have been accumulated so far. These must still be
+raised if they cause a significant burden to maintainers, such as when
+they occur in interfaces.
+</p>
+
+<p>
+We also check that the commit messages match the change they
+contain. Do single commits make sense on their own? Does my
+understanding of the change improves? If not then the commit might be
+too fine grain.
+</p>
+
+<p>
+At last we review our questions and raise questions and doubts left
+unanswered directly to the author.
+</p>
+
+<p>
+Raise first questions and issues that have the biggest impact on the
+change and have long term impact on the system. Raise issues which
+have to do with understanding and correctness.
+</p>
+
+<p>
+Questions about concepts, interfaces and specification of tests should
+therefore be addressed first. Questions that can help make the change
+more economical in the concepts it introduces and local expertise it
+requires are useful in the long run. <sup><a id="fnr.7" name="fnr.7" class="footref" href="#fn.7">7</a></sup>
+</p>
+
+<p>
+We try to assess correctness mostly through the analysis of the tests.
+This mimicks the situation of a future maintainer tasked with
+refactoring the implementation, and tries to assess whether tests form
+an economical executable description of the system's specifications.
+</p>
+
+<p>
+Finally we raise issues/doubts about the implementation and other
+engineering concerns such as risky runtime behaviors,
+performance/memory usage.
+</p>
+
+<p>
+Use care and apply good etiquette when you raise your issues. Respect
+the author<sup><a id="fnr.8" name="fnr.8" class="footref" href="#fn.8">8</a></sup> and assume that they have asked
+themselves many of the same questions you are asking yourself. Ask
+what compromises or trade-offs were made (maybe they were
+unfortunately left undocumented in commit messages or
+documentation). Plain matters of taste "issues" are best left out.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Thanks</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Julien Kirch, Mike Verdone for their kind review and suggestions.
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+Even a single person forms a team. This
+person today as an author and the many subtly changed persons that
+they will tomorrow become as maintainers.
+</p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p class="footpara">
+And this, from a long time. Early examples
+can be found in "The profiles of software designers and producers" by
+Peter Naur, quoted as follows in the NATO Software Engineering
+Conference Review (1968)
+</p>
+
+<blockquote>
+<p>
+This way of developing the software and its
+documentation also allows for mutual review, check, and criticism
+within small groups of software programmers. This should take place
+frequently while the work is in progress and can very well be done
+within groups of two people who look into another’s work. In my
+experience this is a highly effective way of organizing the software
+work
+</p>
+</blockquote></div>
+
+<div class="footdef"><sup><a id="fn.3" name="fn.3" class="footnum" href="#fnr.3">3</a></sup> <p class="footpara">
+A discipline of using checklists is a powerful way to
+introduce more objectivity and predictability inside a practice.
+</p></div>
+
+<div class="footdef"><sup><a id="fn.4" name="fn.4" class="footnum" href="#fnr.4">4</a></sup> <p class="footpara">
+Any practice produces results outside of their
+official purpose, while failing to deliver some of its intended
+results. In any complex organisation these remain either taboo,
+undiscovered or informal. Like with drugs some of the results may be
+positive or negative.
+</p></div>
+
+<div class="footdef"><sup><a id="fn.5" name="fn.5" class="footnum" href="#fnr.5">5</a></sup> <p class="footpara">
+See also Peter Naur "Programming As Theory
+Building"
+</p></div>
+
+<div class="footdef"><sup><a id="fn.6" name="fn.6" class="footnum" href="#fnr.6">6</a></sup> <p class="footpara">
+Software systems and teams exist in a context. A
+mature codebase with many users demands respect of its users' data and
+time, so correctness and stability is highly important. Interfaces are
+reused throughout the system so their stability is also important.
+</p>
+
+<p class="footpara">
+On the other hand during the exploratory phase of a feature or system,
+when concept are not entirely settled, properties such as how quickly
+the system can be changed can lead us to desire a compact and small
+code base that preserves many options open at the expense of
+interface stability.
+</p></div>
+
+<div class="footdef"><sup><a id="fn.7" name="fn.7" class="footnum" href="#fnr.7">7</a></sup> <p class="footpara">
+As a system gets developped and a team
+focuses on its parts one at a time, a codebase will almost always
+become larger than what its team can be the expert of.
+</p></div>
+
+<div class="footdef"><sup><a id="fn.8" name="fn.8" class="footnum" href="#fnr.8">8</a></sup> <p class="footpara">
+I usually prefer to give final say to the author
+unless questions of ethics or morals arise. Team members should feel
+empowered to the maximum extent reasonable. Ultimately the change is
+under their responsibility and they also have spent more time thinking
+about the change than any reviewer has.
+</p></div>
+
+
+</div>
+</div></div>
+
+<style type="text/css">
+#content {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+.post-meta {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+}
+a:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+a {
+    font-family: sans-serif;
+    font-size: 86%;
+    font-weight: medium;
+    letter-spacing: -0.6px;
+    text-decoration: none;
+}
+h1.title {
+    font-size: 1em;
+    text-align: left;
+    margin-top: 0;
+    margin-bottom: 0.2em;
+}
+html {
+    background: rgb(250, 250, 250);
+}
+body {
+    margin: 0;
+    padding: 8px;
+    background: rgb(255, 255, 255);
+    width: 720px;
+    font-size: 20px;
+    line-height: 1.25;
+}
+</style>
+</body>
+</html>
