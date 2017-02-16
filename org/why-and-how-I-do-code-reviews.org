@@ -20,22 +20,22 @@ creator's bias about their own work. In other domains and for similar
 reason writers have editors and airplanes are flown with a
 co-pilot. [fn:Checklists]
 
+When seen as a communication exchange, a mutual review of code can
+also help form[fn:ConceptFormation] and share knowledge and concepts
+of a system.
+
 Regardless of the overt stated goals[fn:IntendedEffects] motivating
 us to adopt a practice, becoming aware of what a practice concretely
 does can help us maximize its effectiveness, and magnify its most
 unique effects.
 
-When seen as a communication exchange, a mutual review of code can
-help form[fn:ConceptFormation] and share knowledge and concepts of a
-system.
-
 A mutual review of code is unique in that it can simulate the situation
 of one maintainer interacting with a part of a software system previously
 unknown to them.
 
-Beyond communication and double-checking, I want code-reviews to help
-ensure that in the long run parts of a software can be understood and
-changed. (To preserve this, I prefer reviews starting with little
+So beyond communication and double-checking, I think that code-reviews
+can help ensure that parts of a software can be understood and changed
+over time. (To preserve this, I prefer reviews starting with little
 pre-exposure to the material, so they can be as unbiased as possible)
 
 My goals are to check that:
