@@ -1,0 +1,267 @@
+#+LATEX_CLASS: handout
+#+LATEX_CLASS_OPTIONS: [a4paper,notoc]
+#+EXCLUDE_TAGS: noexport
+
+* Why And How I Do Code Reviews
+2017-02, Berlin, Nicolas Léveillé.
+
+Software is developped by teams. [fn:IndividualsAreTeamsToo] Teams
+add to and change their systems over time. In this context, teams
+ensure that each system, or some of its parts, can be changed with
+reasonable effort, while maintaining valuable properties.
+
+Teams form bodies of practices around the systems they develop. By now
+many software development teams have adopted code reviews
+practices[fn:FirstMentionOfReviews].
+
+There are broad and well known reasons for reviews such as catching
+unwanted errors or enforcing homogeneity through the removal of a
+creator's bias about their own work. In other domains and for similar
+reason writers have editors and airplanes are flown with a
+co-pilot. [fn:Checklists]
+
+Regardless of the overt stated goals[fn:IntendedEffects] motivating
+us to adopt a practice, becoming aware of what a practice concretely
+does can help us maximize its effectiveness, and magnify its most
+unique effects.
+
+When seen as a communication exchange, a mutual review of code can
+help form[fn:ConceptFormation] and share knowledge and concepts of a
+system.
+
+A mutual review of code is unique in that it can simulate the situation
+of one maintainer interacting with a part of a software system previously
+unknown to them.
+
+Beyond communication and double-checking, I want code-reviews to help
+ensure that in the long run parts of a software can be understood and
+changed. (To preserve this, I prefer reviews starting with little
+pre-exposure to the material, so they can be as unbiased as possible)
+
+My goals are to check that:
+- concepts are used correctly,
+- new concepts are sensible and shared,
+- code is understood today, and will be tomorrow
+- code is likely to be and to stay correct
+- system and context specific long-term properties are preserved [fn:ContextExamples]
+
+I also focus first on long term properties of the system rather than
+short-term ephemereal properties of the presented
+implementation. Implementations can improve, while long-term
+properties degrade easily.
+
+When a change is made to a software system, it must be understandable
+in terms of the pre-existing concepts of that system, or it must
+introduce the new concepts that have been formed with its
+documentation.
+
+Code that can be understood has a manifest purpose. It communicates
+what it does, throughout its existence, without unnecessarily hiding
+its purpose and function. When it is made of multiple parts, these
+parts have stable themes and goals, with visible interfaces
+in-between.
+
+Code is likely correct when tests exist that control what it does
+today and tomorrow, with a manifest specification.
+
+My strategy is to meet these goals as a sequence of reviews of
+different focus. During each of these reviews, I write down my
+questions and doubts without sharing them immediately with the author
+of the change. These will be resolved along the way and raised to the
+author according to their severity.
+
+First a cursory review, which starts with the plain language
+description of the changes, and a quick scan of the difference between
+the old and the new version of the code. We ignore detailed commit
+history at this point.
+
+The goal of this cursory review is to gain insight as to what the
+change is about, estimate the size of the review, and detect any high-
+level oddity that clashes with our superficial understanding and
+intuition.
+
+It gives us a sense for the size of the change. The focus required for
+a review can be intense. Rather than rushing we need to give ourselves
+enough time and peace to do a good job with it.
+
+This cursory review also simulates the situation of a maintainer
+navigating the code in search for some of its features. Code that
+cannot be understood superficially will be hard to navigate. So any
+doubt flagged during this pass probably has to be raised in the end.
+
+The second pass is a static detailed review of the total change. It
+mimicks the situation of a team member trying to understand a piece of
+code in order to later change it. Write down any question or
+doubt. Collect notes about relationships between parts and resolve
+questions that have been raised so far. If needed, open the files in
+your actual development environment.
+
+The third review goes through each commit in detail. This mimicks a
+maintainer having to go through commits while bisecting or analyzing a
+defect in detail.
+
+Reviewing commits one after another should resolve and clarify most
+questions that have been accumulated so far. These must still be
+raised if they cause a significant burden to maintainers, such as when
+they occur in interfaces.
+
+We also check that the commit messages match the change they
+contain. Do single commits make sense on their own? Does my
+understanding of the change improves? If not then the commit might be
+too fine grain.
+
+At last we review our questions and raise questions and doubts left
+unanswered directly to the author.
+
+Raise first questions and issues that have the biggest impact on the
+change and have long term impact on the system. Raise issues which
+have to do with understanding and correctness.
+
+Questions about concepts, interfaces and specification of tests should
+therefore be addressed first. Questions that can help make the change
+more economical in the concepts it introduces and local expertise it
+requires are useful in the long run. [fn:TeamsAndCodebaseSize]
+
+We try to assess correctness mostly through the analysis of the tests.
+This mimicks the situation of a future maintainer tasked with
+refactoring the implementation, and tries to assess whether tests form
+an economical executable description of the system's specifications.
+
+Finally we raise issues/doubts about the implementation and other
+engineering concerns such as risky runtime behaviors,
+performance/memory usage.
+
+Use care and apply good etiquette when you raise your issues. Respect
+the author[fn:PrincipalAuthor] and assume that they have asked
+themselves many of the same questions you are asking yourself. Ask
+what compromises or trade-offs were made (maybe they were
+unfortunately left undocumented in commit messages or
+documentation). Plain matters of taste "issues" are best left out.
+
+* Thanks
+
+Julien Kirch, Mike Verdone for their kind review and suggestions.
+
+* Footnotes
+
+[fn:IndividualsAreTeamsToo] Even a single person forms a team. This
+person today as an author and the many subtly changed persons that
+they will tomorrow become as maintainers.
+
+[fn:FirstMentionOfReviews] And this, from a long time. Early examples
+can be found in "The profiles of software designers and producers" by
+Peter Naur, quoted as follows in the NATO Software Engineering
+Conference Review (1968)
+
+#+begin_quote
+This way of developing the software and its
+documentation also allows for mutual review, check, and criticism
+within small groups of software programmers. This should take place
+frequently while the work is in progress and can very well be done
+within groups of two people who look into another’s work. In my
+experience this is a highly effective way of organizing the software
+work
+#+end_quote
+
+[fn:Checklists] A discipline of using checklists is a powerful way to
+introduce more objectivity and predictability inside a practice.
+
+[fn:IntendedEffects] Any practice produces results outside of their
+official purpose, while failing to deliver some of its intended
+results. In any complex organisation these remain either taboo,
+undiscovered or informal. Like with drugs some of the results may be
+positive or negative.
+
+[fn:ConceptFormation] See also Peter Naur "Programming As Theory
+Building"
+
+[fn:ContextExamples] Software systems and teams exist in a context. A
+mature codebase with many users demands respect of its users' data and
+time, so correctness and stability is highly important. Interfaces are
+reused throughout the system so their stability is also important.
+
+On the other hand during the exploratory phase of a feature or system,
+when concept are not entirely settled, properties such as how quickly
+the system can be changed can lead us to desire a compact and small
+code base that preserves many options open at the expense of
+interface stability.
+
+[fn:TeamsAndCodebaseSize] As a system gets developped and a team
+focuses on its parts one at a time, a codebase will almost always
+become larger than what its team can be the expert of.
+
+[fn:PrincipalAuthor] I usually prefer to give final say to the author
+unless questions of ethics or morals arise. Team members should feel
+empowered to the maximum extent reasonable. Ultimately the change is
+under their responsibility and they also have spent more time thinking
+about the change than any reviewer has.
+
+** Bullet points/notes  :noexport:
+
+even w/o code reviews: - you = peer - code = 0 w/o theory formation
+around it => discuss code upfront (esp. for architecture and design)
+
+code reviews exist: - show code to future people who will have to
+change it
+
+they: - help enforcing policies, (n reasons exist)
+
+future people changing code: - implies mid/long term code base -
+changeability = important
+
+future people: - others, - people change: new versions of today's
+people
+
+my goals: - few, goals we can achieve, - code understood today - code
+will likely be understood tomorrow, next month, - code is likely
+correct, - learn what concepts and code have changed or were added,
+
+contexts: - mature codebase w/ lots of users: long term changeability
++ stability - prototype/product discovery: long term changeability +
+options left open
+
+code that can be understood has a manifest purpose, specification,
+long term goals: - communicates what (everything that) it does, (vs
+code hiding its purpose+function) - made of parts w/ stable themes and
+goals, - interfaces exist between parts,
+
+code is likely correct: - tests exist that control what the code does
+today and tomorrow, - tests show what correct is,
+ 
+my method: - a series of passes over the code - questions/doubts are
+written down, updated
+
+0. read human description of change 1. quick scan of the code mimick
+how a future person might navigate the end result code
+
+2. static review of accumulated change:
+
+mimick how a future person might interact with the (final) code: - do
+I understand intent behind code under change? - write down
+relationships between parts of the change, - write down questions,
+doubts,
+
+In doubt, open whole files in development environment.
+
+3. review of commit history
+
+mimick how a future person might interact with commit history: -
+review commits one after another, - are single commits understandable?
+- does my understanding of the change improve?
+
+4. review and submit questions/doubts left unanswered
+
+Interfaces and tests specifictions tend to stay longer than
+implementation.
+
+Raise questions first with biggest impact on goals of understanding
+and correctness. Allow code author to focus first on what could lead
+to larger changes.
+
+- raise/flag interfaces/test questions/doubts first, w/ high priority
+- raise/flag implementation questions/doubts (risky runtime behaviors,
+performance, memory concerns)
+
+interfaces first, implementation second.
+
+final say left to contributor (responsible)
