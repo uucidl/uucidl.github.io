@@ -14,11 +14,12 @@ Teams form bodies of practices around the systems they develop. By now
 many software development teams have adopted code reviews
 practices[fn:FirstMentionOfReviews].
 
-There are broad and well known reasons for reviews such as catching
-unwanted errors or enforcing homogeneity through the removal of a
-creator's bias about their own work. In other domains and for similar
-reason writers have editors and airplanes are flown with a
+In other domains writers have editors and airplanes are flown with a
 co-pilot. [fn:Checklists]
+
+You are probably familiar with well-known goals for peer reviews such
+as catching mistakes and omissions or enforcing homogeneity. A second
+pair of eyes helps removing a creator's bias about their own work.
 
 When seen as a communication exchange, a mutual review of code can
 also help form[fn:ConceptFormation] and share knowledge and concepts
